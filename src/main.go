@@ -6,25 +6,22 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/marciojalber/devtoolkit/src/toml"
 )
 
 type model struct {
-	quiting bool
-	cursor  int
-	choices []string
+	projects []toml.Config
+	quiting  bool
+	cursor   int
 
 	busy   bool
 	timer  time.Time
 	report string
 }
 
-func initModel() model {
+func initModel(projects []toml.Config) model {
 	m := model{
-		choices: []string{
-			"To compile",
-			"To run",
-			"To doc",
-		},
+		projects: projects,
 	}
 
 	return m
@@ -75,7 +72,7 @@ func (m model) Update(data tea.Msg) (tea.Model, tea.Cmd) {
 				m.cursor--
 			}
 		case "down", "s":
-			if m.cursor < len(m.choices)-1 {
+			if m.cursor < len(m.projects)-1 {
 				m.cursor++
 			}
 		case "enter", " ":
@@ -103,12 +100,14 @@ func (m model) View() string {
 		"",
 	}
 
-	for i, choice := range m.choices {
+	for i, proj := range m.projects {
 		var cursor = "  "
 		if m.cursor == i {
 			cursor = "->"
 		}
-		content = append(content, cursor+" "+choice)
+		msg := "%s %s (%s) - %d scripts"
+		msg = fmt.Sprintf(msg, cursor, proj.Name, proj.Path, len(proj.Scripts))
+		content = append(content, msg)
 	}
 	content = append(content, "")
 
@@ -122,7 +121,9 @@ func (m model) View() string {
 }
 
 func main() {
-	program := tea.NewProgram(initModel())
+	projects := toml.GetProjects()
+
+	program := tea.NewProgram(initModel(projects))
 	if _, err := program.Run(); err != nil {
 		fmt.Println("Error: " + err.Error())
 	}

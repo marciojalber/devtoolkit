@@ -1,0 +1,9 @@
+name = "Dev ToolKit"
+
+[[scripts]]
+file = "scripts/git-merge.bat"
+desc = "Merge no GIT"
+
+[[scripts]]
+file = "scripts/run.bat"
+desc = "Compilar e rodar"
